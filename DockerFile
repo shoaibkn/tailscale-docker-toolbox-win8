@@ -1,16 +1,21 @@
 FROM debian:bullseye-slim
 
-# Replace broken mirrors with archive.debian.org
+# Use archive.debian.org as the Debian mirror
 RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
     sed -i '/security.debian.org/d' /etc/apt/sources.list && \
     apt-get update || true
 
-# Install dependencies with fix for missing packages
+# Install required tools
 RUN apt-get update && \
-    apt-get install -y --fix-missing curl gnupg2 && \
-    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg && \
-    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.list | tee /etc/apt/sources.list.d/tailscale.list && \
-    apt-get update && \
+    apt-get install -y --fix-missing curl gnupg2 apt-transport-https
+
+# Add Tailscale GPG key and APT repo (with trusted=yes to skip Release check)
+RUN curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | \
+    gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg && \
+    echo "deb [trusted=yes] https://pkgs.tailscale.com/stable/debian bullseye main" > /etc/apt/sources.list.d/tailscale.list
+
+# Install Tailscale
+RUN apt-get update && \
     apt-get install -y --fix-missing tailscale && \
     apt-get clean
 
