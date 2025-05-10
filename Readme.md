@@ -1,4 +1,4 @@
-Here's a clear and complete **summary** you can use to create a GitHub repo for **running Tailscale using Docker Toolbox on Windows 8**, with auto-start and auth key management.
+
 
 ---
 
