@@ -1,0 +1,6 @@
+Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup.exe" -OutFile "tailscale-setup.exe"
+Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/quiet" -Wait
+Start-Service Tailscale
+tailscale up --authkey tskey-xxxxxxxxxxxxxxxx
+Get-Service Tailscale
+tailscale status
