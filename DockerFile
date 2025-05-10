@@ -1,22 +1,22 @@
 FROM debian:bullseye-slim
 
-# Use archive.debian.org as the Debian mirror
+# Use Debian archive server for older packages
 RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
     sed -i '/security.debian.org/d' /etc/apt/sources.list && \
     apt-get update || true
 
-# Install required tools
+# Install curl and gnupg2 for repo setup
 RUN apt-get update && \
     apt-get install -y --fix-missing curl gnupg2 apt-transport-https
 
-# Add Tailscale GPG key and APT repo (with trusted=yes to skip Release check)
-RUN curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | \
-    gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg && \
-    echo "deb [trusted=yes] https://pkgs.tailscale.com/stable/debian bullseye main" > /etc/apt/sources.list.d/tailscale.list
+# Add Tailscale APT repo without GPG verification
+RUN echo "deb [trusted=yes] https://pkgs.tailscale.com/stable/debian bullseye main" \
+    > /etc/apt/sources.list.d/tailscale.list
 
 # Install Tailscale
 RUN apt-get update && \
     apt-get install -y --fix-missing tailscale && \
     apt-get clean
 
+# Run tailscaled in userspace networking mode with persistent state
 CMD ["tailscaled", "--state=/var/lib/tailscale/tailscaled.state", "--tun=userspace-networking"]
