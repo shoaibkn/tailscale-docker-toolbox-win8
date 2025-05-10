@@ -1,0 +1,11 @@
+FROM debian:bullseye-slim
+
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 && \
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.gpg | gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg && \
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.list | tee /etc/apt/sources.list.d/tailscale.list && \
+    apt-get update && \
+    apt-get install -y tailscale && \
+    apt-get clean
+
+CMD ["tailscaled", "--state=mem:", "--tun=userspace-networking"]
