@@ -1,10 +1,10 @@
 FROM alpine:3.17
 
-# Enable the community repository
-RUN setup-apkrepos -c -1
+# Enable the community repository by modifying /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.17/community" >> /etc/apk/repositories
 
-# Install Tailscale
+# Update apk and install Tailscale
 RUN apk update && apk add tailscale
 
-# Run Tailscale in userspace networking mode
+# Run Tailscale in userspace networking mode with persistent state
 CMD ["tailscaled", "--state=/var/lib/tailscale/tailscaled.state", "--tun=userspace-networking"]
