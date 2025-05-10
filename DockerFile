@@ -1,10 +1,10 @@
-FROM alpine:latest
+FROM alpine:3.17
 
-# Install dependencies and Tailscale
-RUN apk add --no-cache curl iptables bash ca-certificates \
-    && curl -fsSL https://pkgs.tailscale.com/stable/alpine/tailscale-latest.apk -o tailscale.apk \
-    && apk add --no-cache --allow-untrusted tailscale.apk \
-    && rm tailscale.apk
+# Enable the community repository
+RUN setup-apkrepos -c -1
 
-# Run tailscaled in userspace networking mode with persistent state
-CMD ["tailscaled", "--tun=userspace-networking", "--state=/var/lib/tailscale/tailscaled.state"]
+# Install Tailscale
+RUN apk update && apk add tailscale
+
+# Run Tailscale in userspace networking mode
+CMD ["tailscaled", "--state=/var/lib/tailscale/tailscaled.state", "--tun=userspace-networking"]
