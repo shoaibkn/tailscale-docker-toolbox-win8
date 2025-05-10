@@ -1,22 +1,10 @@
-FROM debian:bullseye-slim
+FROM alpine:latest
 
-# Use Debian archive server for older packages
-RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
-    sed -i '/security.debian.org/d' /etc/apt/sources.list && \
-    apt-get update || true
-
-# Install curl and gnupg2 for repo setup
-RUN apt-get update && \
-    apt-get install -y --fix-missing curl gnupg2 apt-transport-https
-
-# Add Tailscale APT repo without GPG verification
-RUN echo "deb [trusted=yes] https://pkgs.tailscale.com/stable/debian bullseye main" \
-    > /etc/apt/sources.list.d/tailscale.list
-
-# Install Tailscale
-RUN apt-get update && \
-    apt-get install -y --fix-missing tailscale && \
-    apt-get clean
+# Install dependencies and Tailscale
+RUN apk add --no-cache curl iptables bash ca-certificates \
+    && curl -fsSL https://pkgs.tailscale.com/stable/alpine/tailscale-latest.apk -o tailscale.apk \
+    && apk add --no-cache --allow-untrusted tailscale.apk \
+    && rm tailscale.apk
 
 # Run tailscaled in userspace networking mode with persistent state
-CMD ["tailscaled", "--state=/var/lib/tailscale/tailscaled.state", "--tun=userspace-networking"]
+CMD ["tailscaled", "--tun=userspace-networking", "--state=/var/lib/tailscale/tailscaled.state"]
